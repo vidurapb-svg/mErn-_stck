@@ -1,12 +1,14 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const itemRoutes = require("./routes/itemRoutes");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://vidurapb_db_user:Vpb2000@ac-b7qozwi-shard-00-00.akckl9a.mongodb.net:27017,ac-b7qozwi-shard-00-01.akckl9a.mongodb.net:27017,ac-b7qozwi-shard-00-02.akckl9a.mongodb.net:27017/?ssl=true&replicaSet=atlas-7o6o1u-shard-0&authSource=admin&appName=Cluster0")
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
   })
@@ -15,26 +17,11 @@ mongoose.connect("mongodb://vidurapb_db_user:Vpb2000@ac-b7qozwi-shard-00-00.akck
     console.log(err);
   });
 
-// Model (with extra field)
-const Item = mongoose.model("Item", {
-  name: String,
-  quantity: Number,
-  price: Number
-});
-
 // Routes
-app.post("/add", async (req, res) => {
-  const item = new Item(req.body);
-  await item.save();
-  res.send("Item added");
-});
-
-app.get("/items", async (req, res) => {
-  const items = await Item.find();
-  res.json(items);
-});
+app.use("/", itemRoutes);
 
 // Server
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
